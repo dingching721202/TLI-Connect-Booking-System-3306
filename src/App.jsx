@@ -12,12 +12,22 @@ function App() {
   const [availableCourses, setAvailableCourses] = useState([]);
   const [showCourseSelection, setShowCourseSelection] = useState(false);
 
-  const handleDateSelect = (date) => {
+  const handleDateSelect = (date, specificCourse = null) => {
     setSelectedDate(date);
     const dateStr = date.toISOString().split('T')[0];
     const coursesForDate = mockCourses.filter(course => course.date === dateStr);
     setAvailableCourses(coursesForDate);
     setShowCourseSelection(coursesForDate.length > 0);
+
+    // If a specific course was clicked, auto-select it
+    if (specificCourse) {
+      const courseKey = `${specificCourse.id}-${specificCourse.timeSlot}`;
+      const isSelected = selectedCourses.some(c => `${c.id}-${c.timeSlot}` === courseKey);
+      
+      if (!isSelected) {
+        setSelectedCourses(prev => [...prev, specificCourse]);
+      }
+    }
   };
 
   const handleCourseSelect = (course) => {
@@ -31,6 +41,14 @@ function App() {
     } else {
       setSelectedCourses(prev => [...prev, course]);
     }
+  };
+
+  // New function to handle course toggle from calendar
+  const handleCourseToggle = (course) => {
+    const courseKey = `${course.id}-${course.timeSlot}`;
+    setSelectedCourses(prev => 
+      prev.filter(c => `${c.id}-${c.timeSlot}` !== courseKey)
+    );
   };
 
   const handleRemoveCourse = (courseToRemove) => {
@@ -66,7 +84,7 @@ function App() {
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-400/10 rounded-full blur-3xl"></div>
       </div>
-      
+
       <div className="relative container mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-6 sm:py-8">
         {/* Header */}
         <motion.div
@@ -74,7 +92,7 @@ function App() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8 sm:mb-10"
         >
-          <motion.h1 
+          <motion.h1
             className="text-3xl sm:text-4xl lg:text-6xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-3 sm:mb-4 tracking-tight"
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
@@ -82,7 +100,7 @@ function App() {
           >
             TLI Connect Booking
           </motion.h1>
-          <motion.p 
+          <motion.p
             className="text-base sm:text-lg text-gray-600 font-medium"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -90,7 +108,7 @@ function App() {
           >
             專業語言學習課程預約系統 ✨
           </motion.p>
-          
+
           {/* Stats bar */}
           {selectedCourses.length > 0 && (
             <motion.div
@@ -114,7 +132,7 @@ function App() {
         {/* Main Content */}
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start">
           {/* Calendar Section */}
-          <motion.div 
+          <motion.div
             className="lg:flex-[3] xl:flex-[4] w-full"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -126,11 +144,12 @@ function App() {
               onDateSelect={handleDateSelect}
               courses={mockCourses}
               selectedCourses={selectedCourses}
+              onCourseToggle={handleCourseToggle}
             />
           </motion.div>
 
           {/* Sidebar */}
-          <motion.div 
+          <motion.div
             className="hidden lg:block lg:w-80 xl:w-96 space-y-4 flex-shrink-0"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -145,7 +164,7 @@ function App() {
                 onClose={handleCloseCourseSelection}
               />
             )}
-            
+
             <SelectedCourses
               selectedCourses={selectedCourses}
               onRemoveCourse={handleRemoveCourse}
@@ -169,7 +188,7 @@ function App() {
                 />
               </motion.div>
             )}
-            
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

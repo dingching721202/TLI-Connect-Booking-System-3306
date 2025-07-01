@@ -38,15 +38,15 @@ const SelectedCourses = ({ selectedCourses, onRemoveCourse, onConfirmBooking }) 
       animate={{ opacity: 1, y: 0 }}
       className="bg-white rounded-2xl shadow-xl border border-gray-100/60 overflow-hidden"
     >
-      {/* Header */}
-      <div className="bg-gradient-to-r from-emerald-600 to-green-700 text-white p-4">
+      {/* Header - Changed to match calendar colors */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-4">
         <div className="flex items-center space-x-3">
           <SafeIcon icon={FiShoppingCart} className="text-lg" />
           <div>
             <h3 className="text-lg font-bold tracking-wide">
               已選課程
             </h3>
-            <p className="text-sm text-emerald-100 opacity-90">
+            <p className="text-sm text-blue-100 opacity-90">
               共 {selectedCourses.length} 門課程
             </p>
           </div>
