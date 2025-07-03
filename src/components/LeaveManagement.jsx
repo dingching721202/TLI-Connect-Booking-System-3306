@@ -1,17 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React,{useState,useEffect} from 'react';
+import {motion} from 'framer-motion';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
-import { useAuth } from '../contexts/AuthContext';
+import {useAuth} from '../contexts/AuthContext';
 
-const {
-  FiClock, FiUser, FiCalendar, FiCheck, FiX, FiAlertTriangle, FiEdit2, FiEye,
-  FiUserCheck, FiBook, FiMessageSquare, FiFilter, FiSearch, FiDownload,
-  FiPlus, FiRefreshCw, FiChevronDown, FiUsers, FiMail, FiPhone
-} = FiIcons;
+const {FiClock,FiUser,FiCalendar,FiCheck,FiX,FiAlertTriangle,FiEdit2,FiEye,FiUserCheck,FiBook,FiMessageSquare,FiFilter,FiSearch,FiDownload,FiPlus,FiRefreshCw,FiChevronDown,FiUsers,FiMail,FiPhone} = FiIcons;
 
 const LeaveManagement = () => {
-  const { user } = useAuth();
+  const {user} = useAuth();
   const [activeTab, setActiveTab] = useState('requests'); // 'requests' or 'history'
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -19,6 +15,7 @@ const LeaveManagement = () => {
   const [showProcessModal, setShowProcessModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [substituteSearchTerm, setSubstituteSearchTerm] = useState('');
 
   // Mock 教師資料
   const [mockInstructors, setMockInstructors] = useState([
@@ -30,7 +27,8 @@ const LeaveManagement = () => {
       specialties: ['商務華語', '華語會話'],
       status: 'available',
       rating: 4.8,
-      experience: '5年'
+      experience: '5年',
+      currentLoad: 12 // 目前課程數量
     },
     {
       id: 2,
@@ -40,7 +38,8 @@ const LeaveManagement = () => {
       specialties: ['華語文法', '華語寫作'],
       status: 'available',
       rating: 4.9,
-      experience: '8年'
+      experience: '8年',
+      currentLoad: 8
     },
     {
       id: 3,
@@ -50,7 +49,8 @@ const LeaveManagement = () => {
       specialties: ['華語聽力', '華語發音'],
       status: 'available',
       rating: 4.7,
-      experience: '3年'
+      experience: '3年',
+      currentLoad: 15
     },
     {
       id: 4,
@@ -60,7 +60,8 @@ const LeaveManagement = () => {
       specialties: ['商務華語', '華語文法'],
       status: 'available',
       rating: 4.6,
-      experience: '6年'
+      experience: '6年',
+      currentLoad: 10
     },
     {
       id: 5,
@@ -70,7 +71,30 @@ const LeaveManagement = () => {
       specialties: ['華語會話', '華語聽力'],
       status: 'busy',
       rating: 4.8,
-      experience: '4年'
+      experience: '4年',
+      currentLoad: 20
+    },
+    {
+      id: 6,
+      name: '黃老師',
+      email: 'huang@example.com',
+      phone: '0967-890-123',
+      specialties: ['旅遊華語', '華語朗讀'],
+      status: 'available',
+      rating: 4.5,
+      experience: '2年',
+      currentLoad: 6
+    },
+    {
+      id: 7,
+      name: '周老師',
+      email: 'zhou@example.com',
+      phone: '0978-901-234',
+      specialties: ['學術華語', '華語演講'],
+      status: 'available',
+      rating: 4.9,
+      experience: '10年',
+      currentLoad: 14
     }
   ]);
 
@@ -127,7 +151,7 @@ const LeaveManagement = () => {
       courseName: '商務華語會話',
       courseDate: '2025-01-25',
       courseTime: '09:00-10:30',
-      reason: '家庭緊急事件',
+      reason: '家庭緊急事件，需要立即處理',
       requestDate: '2025-01-20',
       status: 'pending', // 'pending', 'approved', 'rejected', 'processed'
       studentCount: 3,
@@ -181,6 +205,27 @@ const LeaveManagement = () => {
       processedBy: '系統管理員',
       adminNotes: '課程取消，學生已通知並安排補課',
       notificationSent: true
+    },
+    {
+      id: 4,
+      instructorId: 1,
+      instructorName: '張老師',
+      courseId: 1,
+      courseName: '商務華語會話',
+      courseDate: '2025-02-01',
+      courseTime: '09:00-10:30',
+      reason: '突發感冒，擔心傳染給學生',
+      requestDate: '2025-01-31',
+      status: 'pending',
+      studentCount: 3,
+      urgency: 'high',
+      substituteAction: null,
+      substituteInstructorId: null,
+      substituteInstructorName: null,
+      processedDate: null,
+      processedBy: null,
+      adminNotes: '',
+      notificationSent: false
     }
   ]);
 
@@ -244,9 +289,9 @@ const LeaveManagement = () => {
     let filtered = leaveRequests.filter(request => {
       // Search filter
       const matchesSearch = request.instructorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request.reason.toLowerCase().includes(searchTerm.toLowerCase());
-
+                          request.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          request.reason.toLowerCase().includes(searchTerm.toLowerCase());
+      
       if (!matchesSearch) return false;
 
       // Status filter
@@ -274,7 +319,21 @@ const LeaveManagement = () => {
       if (instructor.status !== 'available') return false;
       
       // Check if instructor has matching specialty
-      return instructor.specialties.includes(courseCategory);
+      return instructor.specialties.some(specialty => 
+        specialty.includes(courseCategory) || courseCategory.includes(specialty)
+      );
+    });
+  };
+
+  // Filter substitute instructors based on search
+  const getFilteredSubstituteInstructors = (availableInstructors) => {
+    if (!substituteSearchTerm) return availableInstructors;
+    
+    return availableInstructors.filter(instructor => {
+      const searchLower = substituteSearchTerm.toLowerCase();
+      return instructor.name.toLowerCase().includes(searchLower) ||
+             instructor.specialties.some(specialty => specialty.toLowerCase().includes(searchLower)) ||
+             instructor.email.toLowerCase().includes(searchLower);
     });
   };
 
@@ -352,7 +411,7 @@ const LeaveManagement = () => {
 
     setShowProcessModal(false);
     setSelectedRequest(null);
-    
+    setSubstituteSearchTerm('');
     alert(`✅ 請假申請已處理！\n\n處理方式：${action === 'replace' ? '安排代課老師' : '課程取消'}\n${adminNotes}`);
   };
 
@@ -455,22 +514,26 @@ const LeaveManagement = () => {
 
     const course = mockCourses.find(c => c.id === selectedRequest.courseId);
     const availableInstructors = getAvailableInstructors(
-      course?.category, 
-      selectedRequest.instructorId, 
+      course?.category,
+      selectedRequest.instructorId,
       selectedRequest.courseDate
     );
+    const filteredInstructors = getFilteredSubstituteInstructors(availableInstructors);
 
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+          className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
         >
           <div className="bg-gradient-to-r from-green-600 to-emerald-700 text-white p-4 sm:p-6 rounded-t-xl">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-bold">處理請假申請</h3>
-              <button onClick={() => setShowProcessModal(false)}>
+              <button onClick={() => {
+                setShowProcessModal(false);
+                setSubstituteSearchTerm('');
+              }}>
                 <SafeIcon icon={FiX} className="text-white text-xl" />
               </button>
             </div>
@@ -497,6 +560,16 @@ const LeaveManagement = () => {
                   <span className="font-medium text-gray-600">學生人數：</span>
                   <span className="text-gray-900">{selectedRequest.studentCount} 位</span>
                 </div>
+                <div>
+                  <span className="font-medium text-gray-600">緊急程度：</span>
+                  <span className={`font-medium ${getUrgencyColor(selectedRequest.urgency)}`}>
+                    {getUrgencyText(selectedRequest.urgency)}
+                  </span>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600">申請日期：</span>
+                  <span className="text-gray-900">{formatDate(selectedRequest.requestDate)}</span>
+                </div>
                 <div className="sm:col-span-2">
                   <span className="font-medium text-gray-600">請假原因：</span>
                   <span className="text-gray-900">{selectedRequest.reason}</span>
@@ -517,29 +590,77 @@ const LeaveManagement = () => {
                 
                 {availableInstructors.length > 0 ? (
                   <div className="space-y-3">
-                    <p className="text-sm text-green-700">以下老師可以代課：</p>
-                    <div className="space-y-2">
-                      {availableInstructors.map(instructor => (
+                    {/* Search for substitute instructors */}
+                    <div className="relative">
+                      <SafeIcon icon={FiSearch} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="text"
+                        placeholder="搜尋代課老師姓名或專長..."
+                        value={substituteSearchTerm}
+                        onChange={(e) => setSubstituteSearchTerm(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      />
+                    </div>
+
+                    <p className="text-sm text-green-700">
+                      找到 {filteredInstructors.length} 位可代課老師：
+                    </p>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
+                      {filteredInstructors.map(instructor => (
                         <motion.div
                           key={instructor.id}
                           whileHover={{ scale: 1.02 }}
                           className="bg-white rounded-lg p-3 border border-green-200 cursor-pointer hover:border-green-400 transition-colors"
                           onClick={() => handleProcessRequest('replace', instructor.id)}
                         >
-                          <div className="flex justify-between items-start">
-                            <div>
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="flex-1">
                               <h6 className="font-medium text-gray-900">{instructor.name}</h6>
-                              <p className="text-sm text-gray-600">專長：{instructor.specialties.join('、')}</p>
-                              <p className="text-sm text-gray-600">經驗：{instructor.experience} | 評分：{instructor.rating}★</p>
+                              <div className="text-sm text-gray-600 space-y-1">
+                                <div>專長：{instructor.specialties.join('、')}</div>
+                                <div>經驗：{instructor.experience} | 評分：{instructor.rating}★</div>
+                                <div>目前課程：{instructor.currentLoad} 堂</div>
+                              </div>
                             </div>
-                            <div className="flex space-x-2">
-                              <SafeIcon icon={FiMail} className="text-gray-400 text-sm" />
-                              <SafeIcon icon={FiPhone} className="text-gray-400 text-sm" />
+                            <div className="flex flex-col space-y-1">
+                              <div className="flex items-center space-x-1">
+                                <SafeIcon icon={FiMail} className="text-gray-400 text-xs" />
+                                <span className="text-xs text-gray-500">{instructor.email}</span>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <SafeIcon icon={FiPhone} className="text-gray-400 text-xs" />
+                                <span className="text-xs text-gray-500">{instructor.phone}</span>
+                              </div>
                             </div>
+                          </div>
+                          
+                          {/* Matching indicator */}
+                          <div className="flex items-center justify-between">
+                            <div className="text-xs">
+                              {instructor.specialties.some(s => course?.category.includes(s) || s.includes(course?.category)) && (
+                                <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">
+                                  專業匹配
+                                </span>
+                              )}
+                            </div>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="text-xs bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700"
+                            >
+                              選擇代課
+                            </motion.button>
                           </div>
                         </motion.div>
                       ))}
                     </div>
+
+                    {filteredInstructors.length === 0 && substituteSearchTerm && (
+                      <p className="text-sm text-gray-500 text-center py-4">
+                        沒有找到符合搜尋條件的代課老師
+                      </p>
+                    )}
                   </div>
                 ) : (
                   <p className="text-sm text-orange-600">⚠️ 目前沒有可用的代課老師</p>
@@ -568,7 +689,10 @@ const LeaveManagement = () => {
 
             <div className="flex space-x-3 pt-4 border-t border-gray-200">
               <button
-                onClick={() => setShowProcessModal(false)}
+                onClick={() => {
+                  setShowProcessModal(false);
+                  setSubstituteSearchTerm('');
+                }}
                 className="flex-1 px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
               >
                 稍後處理
@@ -589,7 +713,7 @@ const LeaveManagement = () => {
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900">請假管理</h2>
           <p className="text-sm text-gray-600 mt-1">管理教師請假申請與課程安排</p>
         </div>
-        
+
         {/* Action buttons based on role */}
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
           {user?.role === 'instructor' && (
@@ -603,7 +727,7 @@ const LeaveManagement = () => {
               <span>申請請假</span>
             </motion.button>
           )}
-          
+
           {user?.role === 'admin' && (
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -809,7 +933,10 @@ const LeaveManagement = () => {
             <SafeIcon icon={FiClock} className="text-4xl text-gray-400 mx-auto mb-3" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">目前沒有請假申請</h3>
             <p className="text-gray-600">
-              {searchTerm || filterStatus !== 'all' ? '沒有符合篩選條件的請假申請' : '當有新的請假申請時會顯示在這裡'}
+              {searchTerm || filterStatus !== 'all' 
+                ? '沒有符合篩選條件的請假申請' 
+                : '當有新的請假申請時會顯示在這裡'
+              }
             </p>
           </div>
         )}
