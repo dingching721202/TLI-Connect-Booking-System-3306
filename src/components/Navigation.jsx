@@ -1,28 +1,25 @@
-import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import React,{useState} from 'react';
+import {Link,useLocation,useNavigate} from 'react-router-dom';
+import {motion,AnimatePresence} from 'framer-motion';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
-import { useAuth } from '../contexts/AuthContext';
+import {useAuth} from '../contexts/AuthContext';
 
-const {
-  FiHome, FiCalendar, FiUser, FiSettings, FiLogOut, FiMenu, FiX, FiBook, FiUsers, FiBarChart3,
-  FiBookOpen, FiClock
-} = FiIcons;
+const {FiHome,FiCalendar,FiUser,FiSettings,FiLogOut,FiMenu,FiX,FiBook,FiUsers,FiBarChart3,FiBookOpen,FiClock,FiTrendingUp}=FiIcons;
 
-const Navigation = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const { user, logout, hasPermission } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
+const Navigation=()=> {
+  const [isOpen,setIsOpen]=useState(false);
+  const {user,logout,hasPermission}=useAuth();
+  const location=useLocation();
+  const navigate=useNavigate();
 
-  const handleLogout = () => {
+  const handleLogout=()=> {
     logout();
     navigate('/login');
   };
 
-  const getNavigationItems = () => {
-    const items = [];
+  const getNavigationItems=()=> {
+    const items=[];
 
     // Common items for all roles
     items.push({
@@ -54,9 +51,9 @@ const Navigation = () => {
           permission: 'admin_access'
         },
         {
-          name: '數據分析',
-          path: '/admin?tab=analytics',
-          icon: FiBarChart3,
+          name: '代理管理', // 🔄 新增代理管理導航
+          path: '/admin?tab=agents',
+          icon: FiTrendingUp,
           permission: 'admin_access'
         },
         {
@@ -69,7 +66,7 @@ const Navigation = () => {
     }
 
     // Student specific navigation
-    if (user?.role === 'student') {
+    if (user?.role==='student') {
       items.push({
         name: '課程預約',
         path: '/booking',
@@ -96,12 +93,12 @@ const Navigation = () => {
       permission: null
     });
 
-    return items.filter(item => !item.permission || hasPermission(item.permission));
+    return items.filter(item=> !item.permission || hasPermission(item.permission));
   };
 
-  const navigationItems = getNavigationItems();
+  const navigationItems=getNavigationItems();
 
-  const getRoleColor = (role) => {
+  const getRoleColor=(role)=> {
     switch (role) {
       case 'student': return 'bg-blue-100 text-blue-800';
       case 'instructor': return 'bg-green-100 text-green-800';
@@ -110,7 +107,7 @@ const Navigation = () => {
     }
   };
 
-  const getRoleName = (role) => {
+  const getRoleName=(role)=> {
     switch (role) {
       case 'student': return '學生';
       case 'instructor': return '教師';
@@ -119,14 +116,26 @@ const Navigation = () => {
     }
   };
 
-  const isActiveLink = (itemPath) => {
-    if (itemPath === '/dashboard') {
-      return location.pathname === '/dashboard';
+  const isActiveLink=(itemPath)=> {
+    // 儀表板特殊處理
+    if (itemPath==='/dashboard') {
+      return location.pathname==='/dashboard';
     }
+    
+    // 管理員面板路由處理
     if (itemPath.includes('admin')) {
-      return location.pathname === '/admin';
+      if (location.pathname==='/admin') {
+        // 如果沒有 tab 參數，默認為 users
+        const urlParams=new URLSearchParams(location.search);
+        const currentTab=urlParams.get('tab') || 'users';
+        const itemTab=new URL(itemPath,window.location.origin).searchParams.get('tab');
+        return currentTab===itemTab;
+      }
+      return false;
     }
-    return location.pathname === itemPath;
+    
+    // 其他路由
+    return location.pathname===itemPath;
   };
 
   return (
@@ -138,7 +147,7 @@ const Navigation = () => {
             {/* Logo */}
             <Link to="/dashboard" className="flex items-center space-x-3">
               <motion.div
-                whileHover={{ scale: 1.05 }}
+                whileHover={{scale: 1.05}}
                 className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center"
               >
                 <SafeIcon icon={FiBook} className="text-white text-xl" />
@@ -150,7 +159,7 @@ const Navigation = () => {
 
             {/* Navigation Items */}
             <div className="flex items-center space-x-1">
-              {navigationItems.map((item) => (
+              {navigationItems.map((item)=> (
                 <Link
                   key={item.path}
                   to={item.path}
@@ -184,8 +193,8 @@ const Navigation = () => {
                 </div>
               </div>
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{scale: 1.05}}
+                whileTap={{scale: 0.95}}
                 onClick={handleLogout}
                 className="p-2 text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200"
               >
@@ -231,9 +240,9 @@ const Navigation = () => {
 
               {/* Mobile Menu Button */}
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setIsOpen(!isOpen)}
+                whileHover={{scale: 1.05}}
+                whileTap={{scale: 0.95}}
+                onClick={()=> setIsOpen(!isOpen)}
                 className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
               >
                 <SafeIcon icon={isOpen ? FiX : FiMenu} className="text-lg" />
@@ -246,9 +255,9 @@ const Navigation = () => {
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
+              initial={{opacity: 0,height: 0}}
+              animate={{opacity: 1,height: 'auto'}}
+              exit={{opacity: 0,height: 0}}
               className="bg-white border-t border-gray-200/60 shadow-lg"
             >
               <div className="px-3 py-4 space-y-1 max-h-[70vh] overflow-y-auto">
@@ -270,11 +279,11 @@ const Navigation = () => {
                 </div>
 
                 {/* Navigation Items - 手機優化 */}
-                {navigationItems.map((item) => (
+                {navigationItems.map((item)=> (
                   <Link
                     key={item.path}
                     to={item.path}
-                    onClick={() => setIsOpen(false)}
+                    onClick={()=> setIsOpen(false)}
                     className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 ${
                       isActiveLink(item.path)
                         ? 'bg-blue-100 text-blue-700 shadow-sm border border-blue-200'
@@ -288,9 +297,9 @@ const Navigation = () => {
 
                 {/* Logout Button - 手機優化 */}
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => {
+                  whileHover={{scale: 1.02}}
+                  whileTap={{scale: 0.98}}
+                  onClick={()=> {
                     handleLogout();
                     setIsOpen(false);
                   }}
