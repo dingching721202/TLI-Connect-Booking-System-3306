@@ -8,7 +8,7 @@ import LeaveManagement from './LeaveManagement';
 import SystemSettings from './SystemSettings';
 import AgentManagement from './AgentManagement';
 
-const {FiUsers,FiSettings,FiBarChart3,FiUserPlus,FiEdit2,FiTrash2,FiSearch,FiFilter,FiDownload,FiUpload,FiShield,FiCalendar,FiClock,FiRefreshCw,FiAlertTriangle,FiX,FiBuilding,FiPlus,FiEye,FiMessageSquare,FiCheck,FiUserCheck,FiExternalLink,FiLink,FiChevronDown,FiUser,FiBookOpen,FiSave,FiVideo,FiBook,FiCheckCircle,FiCopy,FiMail,FiKey,FiGift,FiTrendingUp,FiAward,FiActivity,FiTarget,FiInbox,FiSend,FiPlay,FiPause,FiStop,FiSkipForward,FiRotateCcw,FiInfo,FiSlash,FiPercent,FiBriefcase,FiToggleLeft,FiToggleRight,FiPhone}=FiIcons;
+const {FiUsers,FiSettings,FiTrendingUp,FiClock,FiBarChart3,FiUserPlus,FiEdit2,FiTrash2,FiSearch,FiFilter,FiDownload,FiUpload,FiShield,FiCalendar,FiRefreshCw,FiAlertTriangle,FiX,FiBuilding,FiPlus,FiEye,FiMessageSquare,FiCheck,FiUserCheck,FiExternalLink,FiLink,FiChevronDown,FiUser,FiBookOpen,FiSave,FiVideo,FiBook,FiCheckCircle,FiCopy,FiMail,FiKey,FiGift,FiAward,FiActivity,FiTarget,FiInbox,FiSend,FiPlay,FiPause,FiStop,FiSkipForward,FiRotateCcw,FiInfo,FiSlash,FiPercent,FiBriefcase,FiToggleLeft,FiToggleRight,FiPhone}=FiIcons;
 
 const AdminPanel=()=> {
   const {user}=useAuth();
@@ -389,7 +389,7 @@ const AdminPanel=()=> {
           price: 0,
           autoRenewal: subAccount.autoRenewal || false,
           daysRemaining: subAccount.daysRemaining,
-          isExpiringSoon: subAccount.daysRemaining <= 14 && subAccount.daysRemaining > 0
+          isExpiringSoon: subAccount.daysRemaining <=14 && subAccount.daysRemaining > 0
         } : null
       }))
     );
@@ -729,6 +729,7 @@ const AdminPanel=()=> {
     }
 
     const scheduleText=generateScheduleText();
+
     if (editingCourse) {
       setMockCourses(prev=> prev.map(course=>
         course.id===editingCourse.id
@@ -798,8 +799,8 @@ const AdminPanel=()=> {
   const getFilteredUsers=()=> {
     let users=mockUsers.filter(user=> {
       const matchesSearch=user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (user.companyName && user.companyName.toLowerCase().includes(searchTerm.toLowerCase()));
+        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (user.companyName && user.companyName.toLowerCase().includes(searchTerm.toLowerCase()));
 
       if (!matchesSearch) return false;
 
@@ -829,11 +830,13 @@ const AdminPanel=()=> {
     let filteredBookings=allBookings.filter(booking=> {
       if (bookingTab==='upcoming' && booking.status !=='upcoming') return false;
       if (bookingTab==='completed' && booking.status !=='completed') return false;
+
       if (membershipFilter==='individual' && booking.membershipType !=='individual') return false;
       if (membershipFilter==='corporate' && booking.membershipType !=='corporate') return false;
       if (membershipFilter==='corporate' && selectedCompany !=='all') {
         if (booking.companyId !==parseInt(selectedCompany)) return false;
       }
+
       return true;
     });
 
@@ -903,7 +906,7 @@ const AdminPanel=()=> {
       const currentCompanyUsers=selectedCompany==='all'
         ? filteredUsers
         : filteredUsers.filter(u=> u.companyId===parseInt(selectedCompany));
-      
+
       stats=[
         {
           label: '企業員工數',
@@ -1008,6 +1011,7 @@ const AdminPanel=()=> {
           'quarterly': {planName: '三個月方案',duration: 3,price: 10800},
           'yearly': {planName: '一年方案',duration: 12,price: 36000}
         };
+
         const plan=planDetails[newUser.membershipPlan];
         if (plan) {
           const endDate=new Date();
@@ -1088,8 +1092,9 @@ const AdminPanel=()=> {
   const handleExportCSV=()=> {
     const filteredUsers=getFilteredUsers();
     const headers=[
-      '姓名','電子郵件','角色','會員類型','企業名稱','會員方案','會員狀態','開始日期','到期日期',
-      '剩餘天數','最後登入','最後活動','加入日期','電話','學習程度','專業領域','教學經驗','部門','自動續約'
+      '姓名','電子郵件','角色','會員類型','企業名稱','會員方案','會員狀態',
+      '開始日期','到期日期','剩餘天數','最後登入','最後活動','加入日期',
+      '電話','學習程度','專業領域','教學經驗','部門','自動續約'
     ];
 
     const csvData=filteredUsers.map(user=> [
@@ -1133,15 +1138,6 @@ const AdminPanel=()=> {
     alert(`✅ CSV檔案匯出成功！\n\n檔案名稱：TLI用戶管理_${filterText}_${timestamp}.csv\n匯出筆數：${filteredUsers.length} 筆`);
   };
 
-  // Tab configuration - 將 analytics 替換為 agents
-  const tabs=[
-    {id: 'users',name: '用戶管理',icon: FiUsers},
-    {id: 'courses',name: '課程管理',icon: FiBookOpen},
-    {id: 'leave',name: '請假管理',icon: FiClock},
-    {id: 'agents',name: '代理管理',icon: FiTrendingUp}, // 替換數據分析
-    {id: 'settings',name: '系統設定',icon: FiSettings}
-  ];
-
   // User Management Component
   const renderUserManagement=()=> (
     <div className="space-y-6">
@@ -1175,7 +1171,10 @@ const AdminPanel=()=> {
           <motion.button
             whileHover={{scale: 1.02}}
             whileTap={{scale: 0.98}}
-            onClick={()=> {setMembershipFilter('all');setSelectedCompany('all');}}
+            onClick={()=> {
+              setMembershipFilter('all');
+              setSelectedCompany('all');
+            }}
             className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
               membershipFilter==='all'
                 ? 'bg-blue-600 text-white shadow-md'
@@ -1188,7 +1187,10 @@ const AdminPanel=()=> {
           <motion.button
             whileHover={{scale: 1.02}}
             whileTap={{scale: 0.98}}
-            onClick={()=> {setMembershipFilter('individual');setSelectedCompany('all');}}
+            onClick={()=> {
+              setMembershipFilter('individual');
+              setSelectedCompany('all');
+            }}
             className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
               membershipFilter==='individual'
                 ? 'bg-blue-600 text-white shadow-md'
@@ -1201,7 +1203,10 @@ const AdminPanel=()=> {
           <motion.button
             whileHover={{scale: 1.02}}
             whileTap={{scale: 0.98}}
-            onClick={()=> {setMembershipFilter('corporate');setSelectedCompany('all');}}
+            onClick={()=> {
+              setMembershipFilter('corporate');
+              setSelectedCompany('all');
+            }}
             className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
               membershipFilter==='corporate'
                 ? 'bg-blue-600 text-white shadow-md'
@@ -1287,7 +1292,9 @@ const AdminPanel=()=> {
                     <motion.button
                       whileHover={{scale: 1.05}}
                       whileTap={{scale: 0.95}}
-                      onClick={()=> {setSelectedCompany(enterprise.id.toString());}}
+                      onClick={()=> {
+                        setSelectedCompany(enterprise.id.toString());
+                      }}
                       className="flex-1 text-xs bg-purple-100 text-purple-700 py-2 px-3 rounded-lg hover:bg-purple-200 transition-colors font-medium"
                     >
                       查看詳情
@@ -1295,7 +1302,9 @@ const AdminPanel=()=> {
                     <motion.button
                       whileHover={{scale: 1.05}}
                       whileTap={{scale: 0.95}}
-                      onClick={()=> {setSelectedCompany(enterprise.id.toString());}}
+                      onClick={()=> {
+                        setSelectedCompany(enterprise.id.toString());
+                      }}
                       className="flex-1 text-xs bg-blue-100 text-blue-700 py-2 px-3 rounded-lg hover:bg-blue-200 transition-colors font-medium"
                     >
                       篩選用戶
@@ -1563,7 +1572,6 @@ const AdminPanel=()=> {
                 {getCourseStatusName(course.status)}
               </span>
             </div>
-
             <div className="space-y-3 mb-4">
               <div className="flex items-center space-x-2">
                 <SafeIcon icon={FiUserCheck} className="text-blue-600 text-sm" />
@@ -1584,7 +1592,6 @@ const AdminPanel=()=> {
                 </span>
               </div>
             </div>
-
             <div className="flex justify-between">
               <motion.button
                 whileHover={{scale: 1.05}}
@@ -1830,45 +1837,7 @@ const AdminPanel=()=> {
 
   return (
     <div className="container mx-auto px-4 lg:px-6 py-8">
-      {/* Header */}
-      <motion.div
-        initial={{opacity: 0,y: 20}}
-        animate={{opacity: 1,y: 0}}
-        className="mb-8"
-      >
-        <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-          系統管理面板
-        </h1>
-        <p className="text-lg text-gray-600">
-          管理用戶、課程、請假申請、代理管理與系統設定
-        </p>
-      </motion.div>
-
-      {/* Tabs */}
-      <div className="mb-8">
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
-            {tabs.map((tab)=> (
-              <motion.button
-                key={tab.id}
-                whileHover={{scale: 1.02}}
-                whileTap={{scale: 0.98}}
-                onClick={()=> setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab===tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                <SafeIcon icon={tab.icon} className="text-lg" />
-                <span>{tab.name}</span>
-              </motion.button>
-            ))}
-          </nav>
-        </div>
-      </div>
-
-      {/* Content */}
+      {/* Content - 移除重複的標題和Tabs */}
       <motion.div
         key={activeTab}
         initial={{opacity: 0,x: 20}}
@@ -1901,9 +1870,8 @@ const AdminPanel=()=> {
                 </button>
               </div>
             </div>
-
             <div className="p-6">
-              <form onSubmit={(e)=> {e.preventDefault(); handleSaveUser();}} className="space-y-6">
+              <form onSubmit={(e)=> {e.preventDefault();handleSaveUser();}} className="space-y-6">
                 {/* 基本資訊 */}
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
                   <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -2015,7 +1983,11 @@ const AdminPanel=()=> {
                             value={newUser.companyId}
                             onChange={(e)=> {
                               const company=enterpriseAccounts.find(c=> c.id===parseInt(e.target.value));
-                              setNewUser(prev=> ({...prev,companyId: e.target.value,companyName: company?.companyName || ''}));
+                              setNewUser(prev=> ({
+                                ...prev,
+                                companyId: e.target.value,
+                                companyName: company?.companyName || ''
+                              }));
                             }}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             required
@@ -2185,9 +2157,8 @@ const AdminPanel=()=> {
                 </button>
               </div>
             </div>
-
             <div className="p-6">
-              <form onSubmit={(e)=> {e.preventDefault(); handleSaveCourse();}} className="space-y-8">
+              <form onSubmit={(e)=> {e.preventDefault();handleSaveCourse();}} className="space-y-8">
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
                   <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                     <SafeIcon icon={FiBook} className="mr-2 text-blue-600" />
