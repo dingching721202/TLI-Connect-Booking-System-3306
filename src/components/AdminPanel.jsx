@@ -5,6 +5,7 @@ import SafeIcon from '../common/SafeIcon';
 import {useAuth} from '../contexts/AuthContext';
 import {useLocation} from 'react-router-dom';
 import LeaveManagement from './LeaveManagement';
+import SystemSettings from './SystemSettings';
 
 const {FiUsers,FiSettings,FiBarChart3,FiUserPlus,FiEdit2,FiTrash2,FiSearch,FiFilter,FiDownload,FiUpload,FiShield,FiCalendar,FiClock,FiRefreshCw,FiAlertTriangle,FiX,FiBuilding,FiPlus,FiEye,FiMessageSquare,FiCheck,FiUserCheck,FiExternalLink,FiLink,FiChevronDown,FiUser,FiBookOpen,FiSave,FiVideo,FiBook,FiCheckCircle,FiCopy,FiMail,FiKey,FiGift,FiTrendingUp,FiAward,FiActivity,FiTarget,FiInbox,FiSend,FiPlay,FiPause,FiStop,FiSkipForward,FiRotateCcw,FiInfo,FiSlash,FiPercent,FiBriefcase,FiToggleLeft,FiToggleRight,FiPhone}=FiIcons;
 
@@ -387,7 +388,7 @@ const AdminPanel=()=> {
           price: 0,
           autoRenewal: subAccount.autoRenewal || false,
           daysRemaining: subAccount.daysRemaining,
-          isExpiringSoon: subAccount.daysRemaining <=14 && subAccount.daysRemaining > 0
+          isExpiringSoon: subAccount.daysRemaining <= 14 && subAccount.daysRemaining > 0
         } : null
       }))
     );
@@ -711,6 +712,7 @@ const AdminPanel=()=> {
     if (newCourse.virtualClassroom && !urlPattern.test(newCourse.virtualClassroom)) {
       errors.push('虛擬教室連結格式不正確');
     }
+
     if (newCourse.materials && !urlPattern.test(newCourse.materials)) {
       errors.push('教材連結格式不正確');
     }
@@ -726,11 +728,15 @@ const AdminPanel=()=> {
     }
 
     const scheduleText=generateScheduleText();
-
     if (editingCourse) {
       setMockCourses(prev=> prev.map(course=>
         course.id===editingCourse.id
-          ? {...course,...newCourse,schedule: scheduleText,lastModified: new Date().toISOString().split('T')[0]}
+          ? {
+              ...course,
+              ...newCourse,
+              schedule: scheduleText,
+              lastModified: new Date().toISOString().split('T')[0]
+            }
           : course
       ));
       alert('✅ 課程已成功更新！');
@@ -772,20 +778,18 @@ const AdminPanel=()=> {
 
   // Toggle auto renewal function
   const handleToggleAutoRenewal=(userId)=> {
-    setMockUsers(prevUsers=>
-      prevUsers.map(user=> {
-        if (user.id===userId && user.membership) {
-          return {
-            ...user,
-            membership: {
-              ...user.membership,
-              autoRenewal: !user.membership.autoRenewal
-            }
-          };
-        }
-        return user;
-      })
-    );
+    setMockUsers(prevUsers=> prevUsers.map(user=> {
+      if (user.id===userId && user.membership) {
+        return {
+          ...user,
+          membership: {
+            ...user.membership,
+            autoRenewal: !user.membership.autoRenewal
+          }
+        };
+      }
+      return user;
+    }));
     alert('✅ 自動續約設定已更新！');
   };
 
@@ -795,12 +799,11 @@ const AdminPanel=()=> {
       const matchesSearch=user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           (user.companyName && user.companyName.toLowerCase().includes(searchTerm.toLowerCase()));
-      
+
       if (!matchesSearch) return false;
 
       if (membershipFilter==='individual' && user.membershipType !=='individual') return false;
       if (membershipFilter==='corporate' && user.membershipType !=='corporate') return false;
-
       if (membershipFilter==='corporate' && selectedCompany !=='all') {
         if (user.companyId !==parseInt(selectedCompany)) return false;
       }
@@ -822,18 +825,14 @@ const AdminPanel=()=> {
   // Filter bookings
   const getFilteredBookings=()=> {
     const allBookings=getAllBookings();
-    
     let filteredBookings=allBookings.filter(booking=> {
       if (bookingTab==='upcoming' && booking.status !=='upcoming') return false;
       if (bookingTab==='completed' && booking.status !=='completed') return false;
-
       if (membershipFilter==='individual' && booking.membershipType !=='individual') return false;
       if (membershipFilter==='corporate' && booking.membershipType !=='corporate') return false;
-
       if (membershipFilter==='corporate' && selectedCompany !=='all') {
         if (booking.companyId !==parseInt(selectedCompany)) return false;
       }
-
       return true;
     });
 
@@ -843,7 +842,6 @@ const AdminPanel=()=> {
   // Get statistics
   const getFilteredStats=()=> {
     const filteredUsers=getFilteredUsers();
-
     let stats=[];
 
     if (membershipFilter==='all') {
@@ -947,7 +945,6 @@ const AdminPanel=()=> {
   // 🆕 新增用戶功能
   const validateUserForm=()=> {
     const errors=[];
-
     if (!newUser.name.trim()) errors.push('姓名');
     if (!newUser.email.trim()) errors.push('電子郵件');
     if (!newUser.role) errors.push('角色');
@@ -965,6 +962,7 @@ const AdminPanel=()=> {
     if (!newUser.password || newUser.password.length < 6) {
       errors.push('密碼至少需要6個字符');
     }
+
     if (newUser.password !==newUser.confirmPassword) {
       errors.push('密碼確認不一致');
     }
@@ -1009,12 +1007,10 @@ const AdminPanel=()=> {
           'quarterly': {planName: '三個月方案',duration: 3,price: 10800},
           'yearly': {planName: '一年方案',duration: 12,price: 36000}
         };
-        
         const plan=planDetails[newUser.membershipPlan];
         if (plan) {
           const endDate=new Date();
           endDate.setMonth(endDate.getMonth() + plan.duration);
-          
           membershipData={
             plan: newUser.membershipPlan,
             planName: plan.planName,
@@ -1092,27 +1088,9 @@ const AdminPanel=()=> {
   // 🆕 CSV匯出功能
   const handleExportCSV=()=> {
     const filteredUsers=getFilteredUsers();
-    
     const headers=[
-      '姓名',
-      '電子郵件',
-      '角色',
-      '會員類型',
-      '企業名稱',
-      '會員方案',
-      '會員狀態',
-      '開始日期',
-      '到期日期',
-      '剩餘天數',
-      '最後登入',
-      '最後活動',
-      '加入日期',
-      '電話',
-      '學習程度',
-      '專業領域',
-      '教學經驗',
-      '部門',
-      '自動續約'
+      '姓名','電子郵件','角色','會員類型','企業名稱','會員方案','會員狀態','開始日期','到期日期','剩餘天數',
+      '最後登入','最後活動','加入日期','電話','學習程度','專業領域','教學經驗','部門','自動續約'
     ];
 
     const csvData=filteredUsers.map(user=> [
@@ -1143,21 +1121,19 @@ const AdminPanel=()=> {
 
     const BOM='\uFEFF';
     const blob=new Blob([BOM + csvContent],{type: 'text/csv;charset=utf-8;'});
-    
     const link=document.createElement('a');
     const url=URL.createObjectURL(blob);
     link.setAttribute('href',url);
-    
+
     const timestamp=new Date().toISOString().slice(0,10);
-    const filterText=membershipFilter==='all' ? '全部' : 
-                    membershipFilter==='individual' ? '個人會員' : '企業會員';
+    const filterText=membershipFilter==='all' ? '全部' :
+                     membershipFilter==='individual' ? '個人會員' : '企業會員';
     link.setAttribute('download',`TLI用戶管理_${filterText}_${timestamp}.csv`);
-    
     link.style.visibility='hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     alert(`✅ CSV檔案匯出成功！\n\n檔案名稱：TLI用戶管理_${filterText}_${timestamp}.csv\n匯出筆數：${filteredUsers.length} 筆`);
   };
 
@@ -1248,7 +1224,6 @@ const AdminPanel=()=> {
             <SafeIcon icon={FiBriefcase} className="inline mr-2" />
             企業會員
           </motion.button>
-
           {membershipFilter==='corporate' && (
             <div className="ml-4 pl-4 border-l border-gray-200">
               <select
@@ -1430,7 +1405,6 @@ const AdminPanel=()=> {
                       <SafeIcon icon={getUserIcon(user)} className="text-white text-sm" />
                     </div>
                   </td>
-
                   <td className="px-4 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900">{user.name}</div>
@@ -1439,20 +1413,17 @@ const AdminPanel=()=> {
                       )}
                     </div>
                   </td>
-
                   <td className="px-4 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{user.email}</div>
                     {user.masterAccount && (
                       <div className="text-xs text-gray-500">主帳號：{user.masterAccount}</div>
                     )}
                   </td>
-
                   <td className="px-4 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(user.role)}`}>
                       {getRoleName(user.role)}
                     </span>
                   </td>
-
                   <td className="px-4 py-4 whitespace-nowrap">
                     {user.membershipType ? (
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getMembershipTypeColor(user.membershipType)}`}>
@@ -1462,13 +1433,11 @@ const AdminPanel=()=> {
                       <span className="text-sm text-gray-400">非會員</span>
                     )}
                   </td>
-
                   <td className="px-4 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
                       {user.membership ? user.membership.planName : '-'}
                     </div>
                   </td>
-
                   <td className="px-4 py-4 whitespace-nowrap">
                     {user.membership ? (
                       <div>
@@ -1485,23 +1454,18 @@ const AdminPanel=()=> {
                       <span className="text-gray-400">-</span>
                     )}
                   </td>
-
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                     {formatDate(user.membership?.startDate)}
                   </td>
-
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                     {formatDate(user.membership?.endDate)}
                   </td>
-
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                     {formatDate(user.lastActivity)}
                   </td>
-
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                     {formatDate(user.joinDate)}
                   </td>
-
                   <td className="px-4 py-4 whitespace-nowrap">
                     {user.membership ? (
                       <motion.button
@@ -1521,7 +1485,6 @@ const AdminPanel=()=> {
                       <span className="text-gray-400">-</span>
                     )}
                   </td>
-
                   <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       <motion.button
@@ -1677,7 +1640,7 @@ const AdminPanel=()=> {
   // All Bookings Management Component
   const renderAllBookings=()=> {
     const filteredBookings=getFilteredBookings();
-    
+
     const upcomingCount=getAllBookings().filter(b=> {
       if (membershipFilter==='individual') return b.status==='upcoming' && b.membershipType==='individual';
       if (membershipFilter==='corporate') {
@@ -1706,9 +1669,8 @@ const AdminPanel=()=> {
           <div>
             <h2 className="text-xl font-semibold text-gray-900">
               {membershipFilter==='individual' ? '個人會員預約狀況' :
-               membershipFilter==='corporate' ? 
-                 (selectedCompany==='all' ? '企業會員預約狀況' : 
-                  `${getAvailableCompanies().find(c=> c.id===parseInt(selectedCompany))?.name || '企業'} 預約狀況`) :
+               membershipFilter==='corporate' ? (selectedCompany==='all' ? '企業會員預約狀況' : 
+               `${getAvailableCompanies().find(c=> c.id===parseInt(selectedCompany))?.name || '企業'} 預約狀況`) :
                '全體預約狀況'}
             </h2>
             {membershipFilter==='corporate' && selectedCompany !=='all' && (
@@ -1717,7 +1679,6 @@ const AdminPanel=()=> {
               </p>
             )}
           </div>
-
           <div className="flex bg-gray-100 rounded-lg p-1">
             <motion.button
               whileHover={{scale: 1.02}}
@@ -1798,7 +1759,6 @@ const AdminPanel=()=> {
                       </div>
                     </div>
                   </div>
-
                   <div className="flex items-center space-x-2 ml-4">
                     {booking.status==='upcoming' && (
                       <>
@@ -1859,8 +1819,7 @@ const AdminPanel=()=> {
               <p className="text-gray-600">
                 {bookingTab==='upcoming'
                   ? '當有新的課程預約時，會顯示在這裡'
-                  : '已完成的課程預約會顯示在這裡'
-                }
+                  : '已完成的課程預約會顯示在這裡'}
               </p>
               {membershipFilter==='corporate' && selectedCompany !=='all' && (
                 <p className="text-sm text-gray-500 mt-2">
@@ -1882,19 +1841,12 @@ const AdminPanel=()=> {
     </div>
   );
 
-  const renderSystemSettings=()=> (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-100/60 p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">系統設定</h2>
-      <p className="text-gray-600">系統設定功能開發中...</p>
-    </div>
-  );
-
   const renderContent=()=> {
     switch (activeTab) {
       case 'users': return renderUserManagement();
       case 'courses': return renderCourseManagement();
       case 'leave': return <LeaveManagement />;
-      case 'settings': return renderSystemSettings();
+      case 'settings': return <SystemSettings />;
       case 'analytics': return renderAnalytics();
       default: return renderUserManagement();
     }
@@ -1975,7 +1927,7 @@ const AdminPanel=()=> {
             </div>
 
             <div className="p-6">
-              <form onSubmit={(e)=> {e.preventDefault();handleSaveUser();}} className="space-y-6">
+              <form onSubmit={(e)=> {e.preventDefault(); handleSaveUser();}} className="space-y-6">
                 {/* 基本資訊 */}
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
                   <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -2015,7 +1967,11 @@ const AdminPanel=()=> {
                       </label>
                       <select
                         value={newUser.role}
-                        onChange={(e)=> setNewUser(prev=> ({...prev,role: e.target.value,membershipType: e.target.value==='student' ? 'individual' : ''}))}
+                        onChange={(e)=> setNewUser(prev=> ({
+                          ...prev,
+                          role: e.target.value,
+                          membershipType: e.target.value==='student' ? 'individual' : ''
+                        }))}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
                       >
@@ -2062,7 +2018,7 @@ const AdminPanel=()=> {
                           <option value="corporate">企業會員</option>
                         </select>
                       </div>
-                      
+
                       {newUser.membershipType==='individual' && (
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -2271,7 +2227,7 @@ const AdminPanel=()=> {
             </div>
 
             <div className="p-6">
-              <form onSubmit={(e)=> {e.preventDefault();handleSaveCourse();}} className="space-y-8">
+              <form onSubmit={(e)=> {e.preventDefault(); handleSaveCourse();}} className="space-y-8">
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
                   <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                     <SafeIcon icon={FiBook} className="mr-2 text-blue-600" />
@@ -2415,7 +2371,6 @@ const AdminPanel=()=> {
                     <SafeIcon icon={FiCalendar} className="mr-2 text-orange-600" />
                     批次安排
                   </h4>
-
                   <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-700 mb-3">選擇安排方式</label>
                     <div className="flex space-x-4 bg-white rounded-lg p-2 border border-orange-200">
@@ -2536,8 +2491,7 @@ const AdminPanel=()=> {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        虛擬教室連結
-                        <span className="text-gray-500 text-xs ml-2">(需以 http:// 或 https:// 開頭)</span>
+                        虛擬教室連結 <span className="text-gray-500 text-xs ml-2">(需以 http:// 或 https:// 開頭)</span>
                       </label>
                       <input
                         type="url"
@@ -2549,8 +2503,7 @@ const AdminPanel=()=> {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        教材連結
-                        <span className="text-gray-500 text-xs ml-2">(需以 http:// 或 https:// 開頭)</span>
+                        教材連結 <span className="text-gray-500 text-xs ml-2">(需以 http:// 或 https:// 開頭)</span>
                       </label>
                       <input
                         type="url"
