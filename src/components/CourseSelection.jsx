@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
 
-const { FiX, FiBook, FiClock, FiUser, FiDollarSign } = FiIcons;
+const { FiX, FiBook, FiClock, FiUser, FiDollarSign, FiGift } = FiIcons;
 
 const CourseSelection = ({ selectedDate, availableCourses, selectedCourses, onCourseSelect, onClose }) => {
   if (!selectedDate || availableCourses.length === 0) return null;
@@ -63,20 +63,17 @@ const CourseSelection = ({ selectedDate, availableCourses, selectedCourses, onCo
                 whileHover={{ scale: 1.01, y: -1 }}
                 whileTap={{ scale: 0.99 }}
                 onClick={() => onCourseSelect(course)}
-                className={`
-                  p-4 rounded-xl border-2 cursor-pointer transition-all duration-300
-                  ${isSelected 
+                className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
+                  isSelected 
                     ? 'border-emerald-400 bg-gradient-to-br from-emerald-50 to-green-50 shadow-lg shadow-emerald-500/20' 
                     : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md hover:shadow-blue-500/10'
-                  }
-                `}
+                }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <h4 className="font-bold text-gray-900 mb-3 text-base leading-tight">
                       {course.title}
                     </h4>
-                    
                     <div className="grid grid-cols-1 gap-2 mb-3">
                       <div className="flex items-center space-x-2">
                         <SafeIcon icon={FiClock} className="text-blue-500 text-sm flex-shrink-0" />
@@ -87,20 +84,18 @@ const CourseSelection = ({ selectedDate, availableCourses, selectedCourses, onCo
                         <span className="text-sm text-gray-700">{course.instructor}</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <SafeIcon icon={FiDollarSign} className="text-emerald-500 text-sm flex-shrink-0" />
+                        <SafeIcon icon={FiGift} className="text-emerald-500 text-sm flex-shrink-0" />
                         <span className="text-sm font-bold text-emerald-600">
-                          {formatPrice(course.price)}
+                          會員免費
                         </span>
                       </div>
                     </div>
-                    
                     {course.description && (
                       <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">
                         {course.description}
                       </p>
                     )}
                   </div>
-                  
                   {isSelected && (
                     <motion.div
                       initial={{ scale: 0, rotate: -180 }}

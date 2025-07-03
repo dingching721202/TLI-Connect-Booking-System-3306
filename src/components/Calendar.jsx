@@ -3,19 +3,16 @@ import { motion } from 'framer-motion';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
 
-const { FiChevronLeft, FiChevronRight } = FiIcons;
+const { FiChevronLeft, FiChevronRight, FiCheck } = FiIcons;
 
 const Calendar = ({ currentDate, onDateChange, onDateSelect, courses, selectedCourses, onCourseToggle }) => {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
-
   const monthNames = [
     '一月', '二月', '三月', '四月', '五月', '六月',
     '七月', '八月', '九月', '十月', '十一月', '十二月'
   ];
-
   const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
-
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const today = new Date();
@@ -36,9 +33,7 @@ const Calendar = ({ currentDate, onDateChange, onDateSelect, courses, selectedCo
   };
 
   const isToday = (day) => {
-    return today.getFullYear() === year && 
-           today.getMonth() === month && 
-           today.getDate() === day;
+    return today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
   };
 
   const navigateMonth = (direction) => {
@@ -72,7 +67,7 @@ const Calendar = ({ currentDate, onDateChange, onDateSelect, courses, selectedCo
     const isCourseSelected = selectedCourses.some(
       sc => sc.id === course.id && sc.timeSlot === course.timeSlot
     );
-
+    
     if (isCourseSelected) {
       // If selected, toggle (remove) it directly
       onCourseToggle(course);
@@ -85,11 +80,11 @@ const Calendar = ({ currentDate, onDateChange, onDateSelect, courses, selectedCo
 
   const renderCalendarDays = () => {
     const days = [];
-
+    
     for (let i = 0; i < 42; i++) {
       const dayNumber = i - firstDay + 1;
       const isCurrentMonth = dayNumber > 0 && dayNumber <= daysInMonth;
-
+      
       if (isCurrentMonth) {
         const coursesForDate = getCoursesForDate(dayNumber);
         const selectedCoursesForDate = getSelectedCoursesForDate(dayNumber);
@@ -103,33 +98,31 @@ const Calendar = ({ currentDate, onDateChange, onDateSelect, courses, selectedCo
             whileHover={hasCourses ? { scale: 1.02, y: -2 } : {}}
             onClick={(e) => handleDateClick(dayNumber, e)}
             className={`
-              h-24 sm:h-28 lg:h-32 xl:h-36 p-1 sm:p-2 border border-gray-200/60 
-              transition-all duration-300 relative overflow-hidden flex flex-col
+              h-24 sm:h-28 lg:h-32 xl:h-36 p-1 sm:p-2 border border-gray-200/60 transition-all duration-300 
+              relative overflow-hidden flex flex-col
               ${hasCourses ? 'cursor-pointer' : 'cursor-default'}
               ${todayClass 
                 ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25' 
                 : hasSelected 
-                  ? 'bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-300/60 shadow-sm shadow-emerald-500/10' 
-                  : hasCourses
-                    ? 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-md hover:shadow-blue-500/10'
-                    : 'bg-white border-gray-200'
+                ? 'bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-300/60 shadow-sm shadow-emerald-500/10'
+                : hasCourses 
+                ? 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-md hover:shadow-blue-500/10'
+                : 'bg-white border-gray-200'
               }
             `}
           >
             {/* Day number - clickable area but no special effects */}
-            <div 
-              className={`
-                date-number text-xs sm:text-sm lg:text-base font-bold mb-1 flex-shrink-0
-                ${todayClass 
-                  ? 'text-white' 
-                  : hasSelected 
-                    ? 'text-emerald-700' 
-                    : hasCourses
-                      ? 'text-gray-800'
-                      : 'text-gray-800'
-                }
-              `}
-            >
+            <div className={`
+              date-number text-xs sm:text-sm lg:text-base font-bold mb-1 flex-shrink-0
+              ${todayClass 
+                ? 'text-white' 
+                : hasSelected 
+                ? 'text-emerald-700' 
+                : hasCourses 
+                ? 'text-gray-800' 
+                : 'text-gray-800'
+              }
+            `}>
               {dayNumber}
             </div>
 
@@ -154,6 +147,7 @@ const Calendar = ({ currentDate, onDateChange, onDateSelect, courses, selectedCo
                   const isCourseSelected = selectedCourses.some(
                     sc => sc.id === course.id && sc.timeSlot === course.timeSlot
                   );
+                  
                   return (
                     <motion.div
                       key={`${course.id}-${course.timeSlot}-${index}`}
@@ -161,13 +155,13 @@ const Calendar = ({ currentDate, onDateChange, onDateSelect, courses, selectedCo
                       whileTap={{ scale: 0.98 }}
                       onClick={(e) => handleCourseClick(course, dayNumber, e)}
                       className={`
-                        flex items-center gap-1 sm:gap-1.5 text-xs py-0.5 sm:py-1 px-1 sm:px-1.5 rounded-md 
-                        transition-all duration-200 cursor-pointer z-10 relative group
+                        flex items-center gap-1 sm:gap-1.5 text-xs py-0.5 sm:py-1 px-1 sm:px-1.5 
+                        rounded-md transition-all duration-200 cursor-pointer z-10 relative group
                         ${todayClass 
                           ? 'text-white/90 bg-white/10 hover:bg-white/20' 
                           : isCourseSelected 
-                            ? 'text-emerald-700 bg-emerald-100/80 shadow-sm shadow-emerald-500/20 hover:bg-emerald-200/80' 
-                            : 'text-gray-700 bg-gray-100/80 hover:bg-blue-100/90 hover:shadow-sm'
+                          ? 'text-emerald-700 bg-emerald-100/80 shadow-sm shadow-emerald-500/20 hover:bg-emerald-200/80'
+                          : 'text-gray-700 bg-gray-100/80 hover:bg-blue-100/90 hover:shadow-sm'
                         }
                       `}
                       title={isCourseSelected ? `點擊取消「${course.title}」` : `點擊選擇「${course.title}」`}
@@ -178,23 +172,23 @@ const Calendar = ({ currentDate, onDateChange, onDateSelect, courses, selectedCo
                         ${todayClass 
                           ? 'text-white/80' 
                           : isCourseSelected 
-                            ? 'text-emerald-600' 
-                            : 'text-blue-600'
+                          ? 'text-emerald-600' 
+                          : 'text-blue-600'
                         }
                       `}>
                         {/* 手機版只顯示開始時間，桌面版顯示完整時間 */}
                         <span className="block sm:hidden">{course.timeSlot.split('-')[0]}</span>
                         <span className="hidden sm:block">{course.timeSlot.split('-')[0]}</span>
                       </div>
-                      
+
                       {/* Course title - 響應式字體大小 */}
                       <div className={`
                         flex-1 truncate font-medium leading-tight text-xs sm:text-xs transition-colors duration-200
                         ${todayClass 
                           ? 'text-white' 
                           : isCourseSelected 
-                            ? 'text-emerald-800' 
-                            : 'text-gray-800'
+                          ? 'text-emerald-800' 
+                          : 'text-gray-800'
                         }
                       `}>
                         {course.title}
@@ -207,22 +201,22 @@ const Calendar = ({ currentDate, onDateChange, onDateSelect, courses, selectedCo
                           animate={{ scale: 1, rotate: 0 }}
                           className="flex-shrink-0 ml-1 transition-colors duration-200"
                         >
-                          <SafeIcon icon={FiIcons.FiCheck} className="text-xs text-emerald-600" />
+                          <SafeIcon icon={FiCheck} className="text-xs text-emerald-600" />
                         </motion.div>
                       )}
                     </motion.div>
                   );
                 })}
-                
+
                 {/* "More" indicator - 手機版只顯示 +X */}
                 {coursesForDate.length > (window.innerWidth < 640 ? 2 : 3) && (
-                  <motion.div 
+                  <motion.div
                     whileHover={{ scale: 1.02, y: -1 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={(e) => handleMoreClick(dayNumber, e)}
                     className={`
-                      flex items-center justify-center text-xs py-1 sm:py-1.5 px-1 sm:px-2 rounded-md 
-                      transition-all duration-200 cursor-pointer z-10 relative font-medium
+                      flex items-center justify-center text-xs py-1 sm:py-1.5 px-1 sm:px-2 
+                      rounded-md transition-all duration-200 cursor-pointer z-10 relative font-medium
                       ${todayClass 
                         ? 'text-white/90 bg-white/10 hover:bg-white/20' 
                         : 'text-blue-600 bg-blue-50/90 hover:bg-blue-100 hover:shadow-sm'
@@ -233,7 +227,6 @@ const Calendar = ({ currentDate, onDateChange, onDateSelect, courses, selectedCo
                     <div className="block sm:hidden">
                       +{coursesForDate.length - 2}
                     </div>
-                    
                     {/* 桌面版保持原有佈局 */}
                     <div className="hidden sm:flex items-center gap-1.5 w-full">
                       <div className={`
@@ -242,7 +235,6 @@ const Calendar = ({ currentDate, onDateChange, onDateSelect, courses, selectedCo
                       `}>
                         +{coursesForDate.length - 3}
                       </div>
-                      
                       <div className={`
                         flex-1 truncate font-medium leading-tight text-xs transition-colors duration-200
                         ${todayClass ? 'text-white' : 'text-blue-600'}
@@ -261,14 +253,14 @@ const Calendar = ({ currentDate, onDateChange, onDateSelect, courses, selectedCo
         );
       } else {
         days.push(
-          <div 
-            key={`empty-${i}`} 
-            className="h-24 sm:h-28 lg:h-32 xl:h-36 border border-gray-100 bg-gray-50/30" 
+          <div
+            key={`empty-${i}`}
+            className="h-24 sm:h-28 lg:h-32 xl:h-36 border border-gray-100 bg-gray-50/30"
           />
         );
       }
     }
-
+    
     return days;
   };
 
@@ -289,11 +281,11 @@ const Calendar = ({ currentDate, onDateChange, onDateSelect, courses, selectedCo
           >
             <SafeIcon icon={FiChevronLeft} className="text-lg sm:text-xl" />
           </motion.button>
-
+          
           <h2 className="text-lg sm:text-xl font-bold tracking-wide">
             {year}年 {monthNames[month]}
           </h2>
-
+          
           <motion.button
             whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.2)' }}
             whileTap={{ scale: 0.95 }}
@@ -308,8 +300,8 @@ const Calendar = ({ currentDate, onDateChange, onDateSelect, courses, selectedCo
       {/* Week days header */}
       <div className="grid grid-cols-7 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200/60">
         {weekDays.map(day => (
-          <div 
-            key={day} 
+          <div
+            key={day}
             className="p-2 sm:p-3 text-center font-semibold text-gray-700 text-sm tracking-wide"
           >
             {day}
