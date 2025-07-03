@@ -6,6 +6,7 @@ import {useAuth} from '../contexts/AuthContext';
 import {useLocation} from 'react-router-dom';
 import LeaveManagement from './LeaveManagement';
 import SystemSettings from './SystemSettings';
+import AgentManagement from './AgentManagement';
 
 const {FiUsers,FiSettings,FiBarChart3,FiUserPlus,FiEdit2,FiTrash2,FiSearch,FiFilter,FiDownload,FiUpload,FiShield,FiCalendar,FiClock,FiRefreshCw,FiAlertTriangle,FiX,FiBuilding,FiPlus,FiEye,FiMessageSquare,FiCheck,FiUserCheck,FiExternalLink,FiLink,FiChevronDown,FiUser,FiBookOpen,FiSave,FiVideo,FiBook,FiCheckCircle,FiCopy,FiMail,FiKey,FiGift,FiTrendingUp,FiAward,FiActivity,FiTarget,FiInbox,FiSend,FiPlay,FiPause,FiStop,FiSkipForward,FiRotateCcw,FiInfo,FiSlash,FiPercent,FiBriefcase,FiToggleLeft,FiToggleRight,FiPhone}=FiIcons;
 
@@ -1061,7 +1062,6 @@ const AdminPanel=()=> {
     };
 
     setMockUsers(prev=> [...prev,newUserData]);
-
     setNewUser({
       name: '',
       email: '',
@@ -1080,7 +1080,6 @@ const AdminPanel=()=> {
       password: '',
       confirmPassword: ''
     });
-
     setShowAddUserModal(false);
     alert('✅ 用戶已成功新增！');
   };
@@ -1089,8 +1088,8 @@ const AdminPanel=()=> {
   const handleExportCSV=()=> {
     const filteredUsers=getFilteredUsers();
     const headers=[
-      '姓名','電子郵件','角色','會員類型','企業名稱','會員方案','會員狀態','開始日期','到期日期','剩餘天數',
-      '最後登入','最後活動','加入日期','電話','學習程度','專業領域','教學經驗','部門','自動續約'
+      '姓名','電子郵件','角色','會員類型','企業名稱','會員方案','會員狀態','開始日期','到期日期',
+      '剩餘天數','最後登入','最後活動','加入日期','電話','學習程度','專業領域','教學經驗','部門','自動續約'
     ];
 
     const csvData=filteredUsers.map(user=> [
@@ -1124,25 +1123,22 @@ const AdminPanel=()=> {
     const link=document.createElement('a');
     const url=URL.createObjectURL(blob);
     link.setAttribute('href',url);
-
     const timestamp=new Date().toISOString().slice(0,10);
-    const filterText=membershipFilter==='all' ? '全部' :
-                     membershipFilter==='individual' ? '個人會員' : '企業會員';
+    const filterText=membershipFilter==='all' ? '全部' : membershipFilter==='individual' ? '個人會員' : '企業會員';
     link.setAttribute('download',`TLI用戶管理_${filterText}_${timestamp}.csv`);
     link.style.visibility='hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-
     alert(`✅ CSV檔案匯出成功！\n\n檔案名稱：TLI用戶管理_${filterText}_${timestamp}.csv\n匯出筆數：${filteredUsers.length} 筆`);
   };
 
-  // Tab configuration
+  // Tab configuration - 將 analytics 替換為 agents
   const tabs=[
     {id: 'users',name: '用戶管理',icon: FiUsers},
     {id: 'courses',name: '課程管理',icon: FiBookOpen},
     {id: 'leave',name: '請假管理',icon: FiClock},
-    {id: 'analytics',name: '數據分析',icon: FiBarChart3},
+    {id: 'agents',name: '代理管理',icon: FiTrendingUp}, // 替換數據分析
     {id: 'settings',name: '系統設定',icon: FiSettings}
   ];
 
@@ -1179,10 +1175,7 @@ const AdminPanel=()=> {
           <motion.button
             whileHover={{scale: 1.02}}
             whileTap={{scale: 0.98}}
-            onClick={()=> {
-              setMembershipFilter('all');
-              setSelectedCompany('all');
-            }}
+            onClick={()=> {setMembershipFilter('all');setSelectedCompany('all');}}
             className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
               membershipFilter==='all'
                 ? 'bg-blue-600 text-white shadow-md'
@@ -1195,10 +1188,7 @@ const AdminPanel=()=> {
           <motion.button
             whileHover={{scale: 1.02}}
             whileTap={{scale: 0.98}}
-            onClick={()=> {
-              setMembershipFilter('individual');
-              setSelectedCompany('all');
-            }}
+            onClick={()=> {setMembershipFilter('individual');setSelectedCompany('all');}}
             className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
               membershipFilter==='individual'
                 ? 'bg-blue-600 text-white shadow-md'
@@ -1211,10 +1201,7 @@ const AdminPanel=()=> {
           <motion.button
             whileHover={{scale: 1.02}}
             whileTap={{scale: 0.98}}
-            onClick={()=> {
-              setMembershipFilter('corporate');
-              setSelectedCompany('all');
-            }}
+            onClick={()=> {setMembershipFilter('corporate');setSelectedCompany('all');}}
             className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
               membershipFilter==='corporate'
                 ? 'bg-blue-600 text-white shadow-md'
@@ -1300,9 +1287,7 @@ const AdminPanel=()=> {
                     <motion.button
                       whileHover={{scale: 1.05}}
                       whileTap={{scale: 0.95}}
-                      onClick={()=> {
-                        setSelectedCompany(enterprise.id.toString());
-                      }}
+                      onClick={()=> {setSelectedCompany(enterprise.id.toString());}}
                       className="flex-1 text-xs bg-purple-100 text-purple-700 py-2 px-3 rounded-lg hover:bg-purple-200 transition-colors font-medium"
                     >
                       查看詳情
@@ -1310,9 +1295,7 @@ const AdminPanel=()=> {
                     <motion.button
                       whileHover={{scale: 1.05}}
                       whileTap={{scale: 0.95}}
-                      onClick={()=> {
-                        setSelectedCompany(enterprise.id.toString());
-                      }}
+                      onClick={()=> {setSelectedCompany(enterprise.id.toString());}}
                       className="flex-1 text-xs bg-blue-100 text-blue-700 py-2 px-3 rounded-lg hover:bg-blue-200 transition-colors font-medium"
                     >
                       篩選用戶
@@ -1668,10 +1651,13 @@ const AdminPanel=()=> {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-xl font-semibold text-gray-900">
-              {membershipFilter==='individual' ? '個人會員預約狀況' :
-               membershipFilter==='corporate' ? (selectedCompany==='all' ? '企業會員預約狀況' : 
-               `${getAvailableCompanies().find(c=> c.id===parseInt(selectedCompany))?.name || '企業'} 預約狀況`) :
-               '全體預約狀況'}
+              {membershipFilter==='individual'
+                ? '個人會員預約狀況'
+                : membershipFilter==='corporate'
+                ? (selectedCompany==='all'
+                  ? '企業會員預約狀況'
+                  : `${getAvailableCompanies().find(c=> c.id===parseInt(selectedCompany))?.name || '企業'} 預約狀況`)
+                : '全體預約狀況'}
             </h2>
             {membershipFilter==='corporate' && selectedCompany !=='all' && (
               <p className="text-sm text-gray-600 mt-1">
@@ -1728,9 +1714,7 @@ const AdminPanel=()=> {
                         {getStatusText(booking.status)}
                       </span>
                       <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                        booking.membershipType==='corporate'
-                          ? 'bg-purple-100 text-purple-800'
-                          : 'bg-blue-100 text-blue-800'
+                        booking.membershipType==='corporate' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
                       }`}>
                         {booking.membershipType==='corporate' ? '企業會員' : '個人會員'}
                       </span>
@@ -1833,21 +1817,13 @@ const AdminPanel=()=> {
     );
   };
 
-  // Placeholder components
-  const renderAnalytics=()=> (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-100/60 p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">數據分析</h2>
-      <p className="text-gray-600">數據分析功能開發中...</p>
-    </div>
-  );
-
   const renderContent=()=> {
     switch (activeTab) {
       case 'users': return renderUserManagement();
       case 'courses': return renderCourseManagement();
       case 'leave': return <LeaveManagement />;
+      case 'agents': return <AgentManagement />; // 新增代理管理
       case 'settings': return <SystemSettings />;
-      case 'analytics': return renderAnalytics();
       default: return renderUserManagement();
     }
   };
@@ -1864,7 +1840,7 @@ const AdminPanel=()=> {
           系統管理面板
         </h1>
         <p className="text-lg text-gray-600">
-          管理用戶、課程、請假申請與系統設定
+          管理用戶、課程、請假申請、代理管理與系統設定
         </p>
       </motion.div>
 
@@ -1967,11 +1943,7 @@ const AdminPanel=()=> {
                       </label>
                       <select
                         value={newUser.role}
-                        onChange={(e)=> setNewUser(prev=> ({
-                          ...prev,
-                          role: e.target.value,
-                          membershipType: e.target.value==='student' ? 'individual' : ''
-                        }))}
+                        onChange={(e)=> setNewUser(prev=> ({...prev,role: e.target.value,membershipType: e.target.value==='student' ? 'individual' : ''}))}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
                       >
@@ -1981,9 +1953,7 @@ const AdminPanel=()=> {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        電話
-                      </label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">電話</label>
                       <input
                         type="tel"
                         value={newUser.phone}
@@ -2018,7 +1988,6 @@ const AdminPanel=()=> {
                           <option value="corporate">企業會員</option>
                         </select>
                       </div>
-
                       {newUser.membershipType==='individual' && (
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -2037,7 +2006,6 @@ const AdminPanel=()=> {
                           </select>
                         </div>
                       )}
-
                       {newUser.membershipType==='corporate' && (
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -2047,11 +2015,7 @@ const AdminPanel=()=> {
                             value={newUser.companyId}
                             onChange={(e)=> {
                               const company=enterpriseAccounts.find(c=> c.id===parseInt(e.target.value));
-                              setNewUser(prev=> ({
-                                ...prev,
-                                companyId: e.target.value,
-                                companyName: company?.companyName || ''
-                              }));
+                              setNewUser(prev=> ({...prev,companyId: e.target.value,companyName: company?.companyName || ''}));
                             }}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             required
@@ -2065,7 +2029,6 @@ const AdminPanel=()=> {
                           </select>
                         </div>
                       )}
-
                       {newUser.membershipType && (
                         <div className="md:col-span-2">
                           <label className="flex items-center space-x-2 cursor-pointer">
@@ -2087,8 +2050,7 @@ const AdminPanel=()=> {
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
                   <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                     <SafeIcon icon={FiSettings} className="mr-2 text-green-600" />
-                    {newUser.role==='student' ? '學習資訊' : 
-                     newUser.role==='instructor' ? '教學資訊' : '管理資訊'}
+                    {newUser.role==='student' ? '學習資訊' : newUser.role==='instructor' ? '教學資訊' : '管理資訊'}
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {newUser.role==='student' && (
@@ -2106,7 +2068,6 @@ const AdminPanel=()=> {
                         </select>
                       </div>
                     )}
-
                     {newUser.role==='instructor' && (
                       <>
                         <div>
@@ -2131,7 +2092,6 @@ const AdminPanel=()=> {
                         </div>
                       </>
                     )}
-
                     {(newUser.role==='instructor' || newUser.role==='admin') && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">部門</label>
