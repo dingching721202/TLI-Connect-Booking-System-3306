@@ -7,8 +7,17 @@ import { useLocation } from 'react-router-dom';
 import LeaveManagement from './LeaveManagement';
 import SystemSettings from './SystemSettings';
 import AgentManagement from './AgentManagement';
+import CourseManagement from './CourseManagement';
 
-const { FiUsers, FiSettings, FiTrendingUp, FiClock, FiBarChart3, FiUserPlus, FiEdit2, FiTrash2, FiSearch, FiFilter, FiDownload, FiUpload, FiShield, FiCalendar, FiRefreshCw, FiAlertTriangle, FiX, FiBuilding, FiPlus, FiEye, FiMessageSquare, FiCheck, FiUserCheck, FiExternalLink, FiLink, FiChevronDown, FiUser, FiBookOpen, FiSave, FiVideo, FiBook, FiCheckCircle, FiCopy, FiMail, FiKey, FiGift, FiAward, FiActivity, FiTarget, FiInbox, FiSend, FiPlay, FiPause, FiStop, FiSkipForward, FiRotateCcw, FiInfo, FiSlash, FiPercent, FiBriefcase, FiToggleLeft, FiToggleRight, FiPhone } = FiIcons;
+const {
+  FiUsers, FiSettings, FiTrendingUp, FiClock, FiBarChart3, FiUserPlus, FiEdit2, FiTrash2,
+  FiSearch, FiFilter, FiDownload, FiUpload, FiShield, FiCalendar, FiRefreshCw, FiAlertTriangle,
+  FiX, FiBuilding, FiPlus, FiEye, FiMessageSquare, FiCheck, FiUserCheck, FiExternalLink,
+  FiLink, FiChevronDown, FiUser, FiBookOpen, FiSave, FiVideo, FiBook, FiCheckCircle,
+  FiCopy, FiMail, FiKey, FiGift, FiAward, FiActivity, FiTarget, FiInbox, FiSend,
+  FiPlay, FiPause, FiStop, FiSkipForward, FiRotateCcw, FiInfo, FiSlash, FiPercent,
+  FiBriefcase, FiToggleLeft, FiToggleRight, FiPhone
+} = FiIcons;
 
 const AdminPanel = () => {
   const { user } = useAuth();
@@ -27,7 +36,7 @@ const AdminPanel = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [editingCourse, setEditingCourse] = useState(null);
   const [bookingTab, setBookingTab] = useState('upcoming');
-  
+
   // 新增企业表单状态
   const [showEnterpriseFormModal, setShowEnterpriseFormModal] = useState(false);
   const [newEnterprise, setNewEnterprise] = useState({
@@ -58,7 +67,7 @@ const AdminPanel = () => {
     password: '',
     confirmPassword: '',
     startDate: '', // 新增：会员开始日期
-    endDate: ''    // 新增：会员结束日期
+    endDate: '' // 新增：会员结束日期
   });
 
   // 編輯用戶表單狀態
@@ -80,7 +89,7 @@ const AdminPanel = () => {
     autoRenewal: true,
     membershipStatus: 'active',
     startDate: '', // 新增：会员开始日期
-    endDate: ''    // 新增：会员结束日期
+    endDate: '' // 新增：会员结束日期
   });
 
   // Get tab from URL params
@@ -270,8 +279,8 @@ const AdminPanel = () => {
       materials: 'https://drive.google.com/folder/d/1BxC2DeFgHiJkLmNoPqRs',
       category: '商務華語',
       level: '中級',
-      weekdays: ['2','4'],
-      tags: ['商務','會話','溝通'],
+      weekdays: ['2', '4'],
+      tags: ['商務', '會話', '溝通'],
       createdDate: '2024-01-10',
       lastModified: '2024-12-15'
     },
@@ -292,8 +301,8 @@ const AdminPanel = () => {
       materials: 'https://drive.google.com/folder/d/2CyD3EfGhIjKlMnOpQrSt',
       category: '華語文法',
       level: '高級',
-      weekdays: ['1','3'],
-      tags: ['文法','語法','結構'],
+      weekdays: ['1', '3'],
+      tags: ['文法', '語法', '結構'],
       createdDate: '2024-01-25',
       lastModified: '2024-12-10'
     }
@@ -611,9 +620,8 @@ const AdminPanel = () => {
   const getFilteredUsers = () => {
     let users = mockUsers.filter(user => {
       const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (user.companyName && user.companyName.toLowerCase().includes(searchTerm.toLowerCase()));
-
+                          user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (user.companyName && user.companyName.toLowerCase().includes(searchTerm.toLowerCase()));
       if (!matchesSearch) return false;
 
       if (membershipFilter === 'individual' && user.membershipType !== 'individual') return false;
@@ -715,10 +723,7 @@ const AdminPanel = () => {
         }
       ];
     } else if (membershipFilter === 'corporate') {
-      const currentCompanyUsers = selectedCompany === 'all'
-        ? filteredUsers
-        : filteredUsers.filter(u => u.companyId === parseInt(selectedCompany));
-
+      const currentCompanyUsers = selectedCompany === 'all' ? filteredUsers : filteredUsers.filter(u => u.companyId === parseInt(selectedCompany));
       stats = [
         {
           label: '企業員工數',
@@ -806,6 +811,7 @@ const AdminPanel = () => {
   // 新增用戶功能
   const validateUserForm = () => {
     const errors = [];
+
     if (!newUser.name.trim()) errors.push('姓名');
     if (!newUser.email.trim()) errors.push('電子郵件');
     if (!newUser.role) errors.push('角色');
@@ -832,9 +838,11 @@ const AdminPanel = () => {
       if (!newUser.membershipType) {
         errors.push('會員類型（學生必填）');
       }
+
       if (newUser.membershipType === 'corporate' && !newUser.companyId) {
         errors.push('企業（企業會員必填）');
       }
+
       if (newUser.membershipType === 'individual' && !newUser.membershipPlan) {
         errors.push('會員方案（個人會員必填）');
       }
@@ -864,9 +872,9 @@ const AdminPanel = () => {
     if (newUser.role === 'student') {
       if (newUser.membershipType === 'individual') {
         const planDetails = {
-          'monthly': { planName: '月方案', duration: 1, price: 4500 },
-          'quarterly': { planName: '三個月方案', duration: 3, price: 10800 },
-          'yearly': { planName: '一年方案', duration: 12, price: 36000 }
+          'monthly': {planName: '月方案', duration: 1, price: 4500},
+          'quarterly': {planName: '三個月方案', duration: 3, price: 10800},
+          'yearly': {planName: '一年方案', duration: 12, price: 36000}
         };
 
         const plan = planDetails[newUser.membershipPlan];
@@ -979,6 +987,7 @@ const AdminPanel = () => {
   // 編輯用戶表單驗證
   const validateEditUserForm = () => {
     const errors = [];
+
     if (!editUser.name.trim()) errors.push('姓名');
     if (!editUser.email.trim()) errors.push('電子郵件');
     if (!editUser.role) errors.push('角色');
@@ -998,9 +1007,11 @@ const AdminPanel = () => {
       if (!editUser.membershipType) {
         errors.push('會員類型（學生必填）');
       }
+
       if (editUser.membershipType === 'corporate' && !editUser.companyId) {
         errors.push('企業（企業會員必填）');
       }
+
       if (editUser.membershipType === 'individual' && !editUser.membershipPlan) {
         errors.push('會員方案（個人會員必填）');
       }
@@ -1033,9 +1044,9 @@ const AdminPanel = () => {
 
         if (editUser.role === 'student' && editUser.membershipType === 'individual' && editUser.membershipPlan) {
           const planDetails = {
-            'monthly': { planName: '月方案', duration: 1, price: 4500 },
-            'quarterly': { planName: '三個月方案', duration: 3, price: 10800 },
-            'yearly': { planName: '一年方案', duration: 12, price: 36000 }
+            'monthly': {planName: '月方案', duration: 1, price: 4500},
+            'quarterly': {planName: '三個月方案', duration: 3, price: 10800},
+            'yearly': {planName: '一年方案', duration: 12, price: 36000}
           };
 
           const plan = planDetails[editUser.membershipPlan];
@@ -1043,7 +1054,6 @@ const AdminPanel = () => {
             // 使用編輯的日期或計算新的日期
             const startDate = editUser.startDate || new Date().toISOString().split('T')[0];
             const endDate = editUser.endDate || calculateEndDate(startDate, plan.duration);
-            
             updatedMembership = {
               plan: editUser.membershipPlan,
               planName: plan.planName,
@@ -1138,9 +1148,10 @@ const AdminPanel = () => {
   const handleExportCSV = () => {
     const filteredUsers = getFilteredUsers();
     const headers = [
-      '姓名', '電子郵件', '角色', '會員類型', '企業名稱', '會員方案', '會員狀態',
-      '開始日期', '到期日期', '剩餘天數', '最後登入', '最後活動', '加入日期',
-      '電話', '學習程度', '專業領域', '教學經驗', '部門', '自動續約'
+      '姓名', '電子郵件', '角色', '會員類型', '企業名稱',
+      '會員方案', '會員狀態', '開始日期', '到期日期', '剩餘天數',
+      '最後登入', '最後活動', '加入日期', '電話', '學習程度',
+      '專業領域', '教學經驗', '部門', '自動續約'
     ];
 
     const csvData = filteredUsers.map(user => [
@@ -1174,13 +1185,16 @@ const AdminPanel = () => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
+
     const timestamp = new Date().toISOString().slice(0, 10);
     const filterText = membershipFilter === 'all' ? '全部' : membershipFilter === 'individual' ? '個人會員' : '企業會員';
     link.setAttribute('download', `TLI用戶管理_${filterText}_${timestamp}.csv`);
+
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
     alert(`✅ CSV檔案匯出成功！\n\n檔案名稱：TLI用戶管理_${filterText}_${timestamp}.csv\n匯出筆數：${filteredUsers.length} 筆`);
   };
 
@@ -1262,6 +1276,7 @@ const AdminPanel = () => {
             <SafeIcon icon={FiBriefcase} className="inline mr-2" />
             企業會員
           </motion.button>
+
           {membershipFilter === 'corporate' && (
             <div className="ml-4 pl-4 border-l border-gray-200">
               <select
@@ -1317,7 +1332,6 @@ const AdminPanel = () => {
                   >
                     <SafeIcon icon={FiTrash2} className="text-sm" />
                   </motion.button>
-                  
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <h4 className="font-semibold text-gray-900">{enterprise.companyName}</h4>
@@ -1587,12 +1601,18 @@ const AdminPanel = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'users': return renderUserManagement();
-      case 'courses': return <div>課程管理功能開發中...</div>;
-      case 'leave': return <LeaveManagement />;
-      case 'agents': return <AgentManagement />;
-      case 'settings': return <SystemSettings />;
-      default: return renderUserManagement();
+      case 'users':
+        return renderUserManagement();
+      case 'courses':
+        return <CourseManagement />;
+      case 'leave':
+        return <LeaveManagement />;
+      case 'agents':
+        return <AgentManagement />;
+      case 'settings':
+        return <SystemSettings />;
+      default:
+        return renderUserManagement();
     }
   };
 
@@ -1625,7 +1645,13 @@ const AdminPanel = () => {
               </div>
             </div>
             <div className="p-6">
-              <form onSubmit={(e) => {e.preventDefault();handleSaveUser();}} className="space-y-6">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSaveUser();
+                }}
+                className="space-y-6"
+              >
                 {/* 基本資訊 */}
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
                   <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -1640,7 +1666,7 @@ const AdminPanel = () => {
                       <input
                         type="text"
                         value={newUser.name}
-                        onChange={(e) => setNewUser(prev => ({...prev, name: e.target.value}))}
+                        onChange={(e) => setNewUser(prev => ({ ...prev, name: e.target.value }))}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="請輸入用戶姓名"
                         required
@@ -1653,7 +1679,7 @@ const AdminPanel = () => {
                       <input
                         type="email"
                         value={newUser.email}
-                        onChange={(e) => setNewUser(prev => ({...prev, email: e.target.value}))}
+                        onChange={(e) => setNewUser(prev => ({ ...prev, email: e.target.value }))}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="請輸入電子郵件"
                         required
@@ -1665,7 +1691,7 @@ const AdminPanel = () => {
                       </label>
                       <select
                         value={newUser.role}
-                        onChange={(e) => setNewUser(prev => ({...prev, role: e.target.value, membershipType: e.target.value === 'student' ? 'individual' : ''}))}
+                        onChange={(e) => setNewUser(prev => ({ ...prev, role: e.target.value, membershipType: e.target.value === 'student' ? 'individual' : '' }))}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
                       >
@@ -1679,7 +1705,7 @@ const AdminPanel = () => {
                       <input
                         type="tel"
                         value={newUser.phone}
-                        onChange={(e) => setNewUser(prev => ({...prev, phone: e.target.value}))}
+                        onChange={(e) => setNewUser(prev => ({ ...prev, phone: e.target.value }))}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="09xxxxxxxx"
                       />
@@ -1701,7 +1727,7 @@ const AdminPanel = () => {
                         </label>
                         <select
                           value={newUser.membershipType}
-                          onChange={(e) => setNewUser(prev => ({...prev, membershipType: e.target.value}))}
+                          onChange={(e) => setNewUser(prev => ({ ...prev, membershipType: e.target.value }))}
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                           required
                         >
@@ -1718,7 +1744,7 @@ const AdminPanel = () => {
                           <select
                             value={newUser.membershipPlan}
                             onChange={(e) => {
-                              setNewUser(prev => ({...prev, membershipPlan: e.target.value}));
+                              setNewUser(prev => ({ ...prev, membershipPlan: e.target.value }));
                               // 自動計算結束日期
                               if (e.target.value && newUser.startDate) {
                                 const planDetails = {
@@ -1729,7 +1755,7 @@ const AdminPanel = () => {
                                 const plan = planDetails[e.target.value];
                                 if (plan) {
                                   const endDate = calculateEndDate(newUser.startDate, plan.duration);
-                                  setNewUser(prev => ({...prev, endDate: endDate}));
+                                  setNewUser(prev => ({ ...prev, endDate: endDate }));
                                 }
                               }
                             }}
@@ -1770,6 +1796,7 @@ const AdminPanel = () => {
                           </select>
                         </div>
                       )}
+
                       {/* 日期設定 */}
                       {newUser.membershipType && (
                         <>
@@ -1781,7 +1808,7 @@ const AdminPanel = () => {
                               type="date"
                               value={newUser.startDate}
                               onChange={(e) => {
-                                setNewUser(prev => ({...prev, startDate: e.target.value}));
+                                setNewUser(prev => ({ ...prev, startDate: e.target.value }));
                                 // 自動計算結束日期
                                 if (e.target.value && newUser.membershipPlan) {
                                   const planDetails = {
@@ -1792,7 +1819,7 @@ const AdminPanel = () => {
                                   const plan = planDetails[newUser.membershipPlan];
                                   if (plan) {
                                     const endDate = calculateEndDate(e.target.value, plan.duration);
-                                    setNewUser(prev => ({...prev, endDate: endDate}));
+                                    setNewUser(prev => ({ ...prev, endDate: endDate }));
                                   }
                                 }
                               }}
@@ -1806,19 +1833,20 @@ const AdminPanel = () => {
                             <input
                               type="date"
                               value={newUser.endDate}
-                              onChange={(e) => setNewUser(prev => ({...prev, endDate: e.target.value}))}
+                              onChange={(e) => setNewUser(prev => ({ ...prev, endDate: e.target.value }))}
                               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             />
                           </div>
                         </>
                       )}
+
                       {newUser.membershipType && (
                         <div className="md:col-span-2">
                           <label className="flex items-center space-x-2 cursor-pointer">
                             <input
                               type="checkbox"
                               checked={newUser.autoRenewal}
-                              onChange={(e) => setNewUser(prev => ({...prev, autoRenewal: e.target.checked}))}
+                              onChange={(e) => setNewUser(prev => ({ ...prev, autoRenewal: e.target.checked }))}
                               className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
                             />
                             <span className="text-sm font-medium text-gray-700">啟用自動續約</span>
@@ -1843,7 +1871,7 @@ const AdminPanel = () => {
                       <input
                         type="password"
                         value={newUser.password}
-                        onChange={(e) => setNewUser(prev => ({...prev, password: e.target.value}))}
+                        onChange={(e) => setNewUser(prev => ({ ...prev, password: e.target.value }))}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                         placeholder="至少6個字符"
                         required
@@ -1856,7 +1884,7 @@ const AdminPanel = () => {
                       <input
                         type="password"
                         value={newUser.confirmPassword}
-                        onChange={(e) => setNewUser(prev => ({...prev, confirmPassword: e.target.value}))}
+                        onChange={(e) => setNewUser(prev => ({ ...prev, confirmPassword: e.target.value }))}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                         placeholder="請再次輸入密碼"
                         required
@@ -1906,10 +1934,13 @@ const AdminPanel = () => {
               </div>
             </div>
             <div className="p-6">
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                handleSaveEditUser();
-              }} className="space-y-6">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSaveEditUser();
+                }}
+                className="space-y-6"
+              >
                 {/* 基本資訊 */}
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
                   <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -1924,7 +1955,7 @@ const AdminPanel = () => {
                       <input
                         type="text"
                         value={editUser.name}
-                        onChange={(e) => setEditUser(prev => ({...prev, name: e.target.value}))}
+                        onChange={(e) => setEditUser(prev => ({ ...prev, name: e.target.value }))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                         required
                       />
@@ -1936,7 +1967,7 @@ const AdminPanel = () => {
                       <input
                         type="email"
                         value={editUser.email}
-                        onChange={(e) => setEditUser(prev => ({...prev, email: e.target.value}))}
+                        onChange={(e) => setEditUser(prev => ({ ...prev, email: e.target.value }))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                         required
                       />
@@ -1948,7 +1979,7 @@ const AdminPanel = () => {
                       <input
                         type="tel"
                         value={editUser.phone || ''}
-                        onChange={(e) => setEditUser(prev => ({...prev, phone: e.target.value}))}
+                        onChange={(e) => setEditUser(prev => ({ ...prev, phone: e.target.value }))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                         placeholder="09xxxxxxxx"
                       />
@@ -1959,7 +1990,7 @@ const AdminPanel = () => {
                       </label>
                       <select
                         value={editUser.role}
-                        onChange={(e) => setEditUser(prev => ({...prev, role: e.target.value}))}
+                        onChange={(e) => setEditUser(prev => ({ ...prev, role: e.target.value }))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="student">學生</option>
@@ -1984,7 +2015,7 @@ const AdminPanel = () => {
                         </label>
                         <select
                           value={editUser.membershipType || ''}
-                          onChange={(e) => setEditUser(prev => ({...prev, membershipType: e.target.value}))}
+                          onChange={(e) => setEditUser(prev => ({ ...prev, membershipType: e.target.value }))}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                         >
                           <option value="">請選擇會員類型</option>
@@ -2000,7 +2031,7 @@ const AdminPanel = () => {
                           <select
                             value={editUser.membershipPlan || ''}
                             onChange={(e) => {
-                              setEditUser(prev => ({...prev, membershipPlan: e.target.value}));
+                              setEditUser(prev => ({ ...prev, membershipPlan: e.target.value }));
                               // 自動計算結束日期
                               if (e.target.value && editUser.startDate) {
                                 const planDetails = {
@@ -2011,7 +2042,7 @@ const AdminPanel = () => {
                                 const plan = planDetails[e.target.value];
                                 if (plan) {
                                   const endDate = calculateEndDate(editUser.startDate, plan.duration);
-                                  setEditUser(prev => ({...prev, endDate: endDate}));
+                                  setEditUser(prev => ({ ...prev, endDate: endDate }));
                                 }
                               }
                             }}
@@ -2050,6 +2081,7 @@ const AdminPanel = () => {
                           </select>
                         </div>
                       )}
+
                       {/* 日期設定 */}
                       {editUser.membershipType && (
                         <>
@@ -2061,7 +2093,7 @@ const AdminPanel = () => {
                               type="date"
                               value={editUser.startDate || ''}
                               onChange={(e) => {
-                                setEditUser(prev => ({...prev, startDate: e.target.value}));
+                                setEditUser(prev => ({ ...prev, startDate: e.target.value }));
                                 // 自動計算結束日期
                                 if (e.target.value && editUser.membershipPlan) {
                                   const planDetails = {
@@ -2072,7 +2104,7 @@ const AdminPanel = () => {
                                   const plan = planDetails[editUser.membershipPlan];
                                   if (plan) {
                                     const endDate = calculateEndDate(e.target.value, plan.duration);
-                                    setEditUser(prev => ({...prev, endDate: endDate}));
+                                    setEditUser(prev => ({ ...prev, endDate: endDate }));
                                   }
                                 }
                               }}
@@ -2086,18 +2118,19 @@ const AdminPanel = () => {
                             <input
                               type="date"
                               value={editUser.endDate || ''}
-                              onChange={(e) => setEditUser(prev => ({...prev, endDate: e.target.value}))}
+                              onChange={(e) => setEditUser(prev => ({ ...prev, endDate: e.target.value }))}
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                             />
                           </div>
                         </>
                       )}
+
                       <div className="md:col-span-2">
                         <label className="flex items-center space-x-2 cursor-pointer">
                           <input
                             type="checkbox"
                             checked={editUser.autoRenewal || false}
-                            onChange={(e) => setEditUser(prev => ({...prev, autoRenewal: e.target.checked}))}
+                            onChange={(e) => setEditUser(prev => ({ ...prev, autoRenewal: e.target.checked }))}
                             className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
                           />
                           <span className="text-sm font-medium text-gray-700">啟用自動續約</span>
@@ -2147,10 +2180,13 @@ const AdminPanel = () => {
               </div>
             </div>
             <div className="p-6">
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                handleAddEnterprise();
-              }} className="space-y-4">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleAddEnterprise();
+                }}
+                className="space-y-4"
+              >
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     企業名稱 <span className="text-red-500">*</span>
@@ -2158,10 +2194,7 @@ const AdminPanel = () => {
                   <input
                     type="text"
                     value={newEnterprise.companyName}
-                    onChange={(e) => setNewEnterprise(prev => ({
-                      ...prev,
-                      companyName: e.target.value
-                    }))}
+                    onChange={(e) => setNewEnterprise(prev => ({ ...prev, companyName: e.target.value }))}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                     required
                   />
@@ -2173,10 +2206,7 @@ const AdminPanel = () => {
                   <input
                     type="text"
                     value={newEnterprise.masterName}
-                    onChange={(e) => setNewEnterprise(prev => ({
-                      ...prev,
-                      masterName: e.target.value
-                    }))}
+                    onChange={(e) => setNewEnterprise(prev => ({ ...prev, masterName: e.target.value }))}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                     required
                   />
@@ -2188,10 +2218,7 @@ const AdminPanel = () => {
                   <input
                     type="email"
                     value={newEnterprise.masterEmail}
-                    onChange={(e) => setNewEnterprise(prev => ({
-                      ...prev,
-                      masterEmail: e.target.value
-                    }))}
+                    onChange={(e) => setNewEnterprise(prev => ({ ...prev, masterEmail: e.target.value }))}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                     required
                   />
@@ -2205,10 +2232,7 @@ const AdminPanel = () => {
                     min="5"
                     max="100"
                     value={newEnterprise.totalSlots}
-                    onChange={(e) => setNewEnterprise(prev => ({
-                      ...prev,
-                      totalSlots: parseInt(e.target.value)
-                    }))}
+                    onChange={(e) => setNewEnterprise(prev => ({ ...prev, totalSlots: parseInt(e.target.value) }))}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                   />
                   <p className="text-xs text-gray-500 mt-1">最少 5 個帳號，最多 100 個帳號</p>
@@ -2219,10 +2243,7 @@ const AdminPanel = () => {
                   </label>
                   <select
                     value={newEnterprise.membershipDuration}
-                    onChange={(e) => setNewEnterprise(prev => ({
-                      ...prev,
-                      membershipDuration: parseInt(e.target.value)
-                    }))}
+                    onChange={(e) => setNewEnterprise(prev => ({ ...prev, membershipDuration: parseInt(e.target.value) }))}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                   >
                     <option value={6}>6 個月</option>
